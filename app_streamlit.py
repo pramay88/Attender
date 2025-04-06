@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import plotly.express as px
 import calplot
+from matplotlib.colors import ListedColormap
 from app import faculty_subjects
 
 API_URL = "http://127.0.0.1:5000"
@@ -279,17 +280,17 @@ def plot_attendance_calendar(student_name, subject_filter=None):
     
     # Map status to numeric values for heatmap
     status_map = {
-        "Present": 1,       # Green
-        "Absent": -1,       # Red
-        "No College": 0     # Grey
+        "Present": 1,   # Green
+        "Absent": -1,   # Red
+        "No College": 0  # Grey
     }
     df["status_value"] = df["status"].map(status_map)
 
     # Group by date (in case multiple entries exist)
     daily_status = df.groupby("date")["status_value"].first()
 
-    # Define custom color map: Gray (No College), Red (Absent), Green (Present)
-    from matplotlib.colors import ListedColormap
+    # Gray (No College), Red (Absent), Green (Present)
+    
     custom_cmap = ListedColormap(["#d3d3d3", "#ff0000", "#00cc44"])  # 0: grey, -1: red, 1: green
 
     # Plot using calplot
