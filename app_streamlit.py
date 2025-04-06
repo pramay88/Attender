@@ -3,6 +3,7 @@ import requests
 import matplotlib.pyplot as plt
 import pandas as pd
 import plotly.express as px
+import calplot
 from app import faculty_subjects
 
 API_URL = "http://127.0.0.1:5000"
@@ -229,7 +230,6 @@ def plot_attendance_graph(subject_attendance, overall_present, overall_total):
 # 📌 Function to Fetch & Plot Student Attendance for Faculty
 def fetch_and_plot_student_attendance(student):
     response = requests.get(f"{API_URL}/get_attendance/{student}")
-
     
     if response.status_code == 200:
         data = response.json()
@@ -264,35 +264,49 @@ def fetch_attendance(student):
         return []
 
 # Function to plot attendance calendar
-def plot_attendance_calendar(student):
-    data = fetch_attendance(student)
+def plot_attendance_calendar(student_name, subject_filter=None):
 
-    if not data:
-        st.warning("⚠ No attendance records found!")
+    # Fetch attendance data
+    attendance_data = fetch_attendance(student_name)
+
+    if not attendance_data:
+        st.warning("No attendance data found.")
         return
 
-    df = pd.DataFrame(data)
-    
-    if "date" not in df or "status" not in df:
-        st.error("❌ Invalid data format!")
-        return
-
-    # Convert date to datetime
+    # Create DataFrame
+    df = pd.DataFrame(attendance_data)
     df["date"] = pd.to_datetime(df["date"])
+    
+    # Map status to numeric values for heatmap
+    status_map = {
+        "Present": 1,       # Green
+        "Absent": -1,       # Red
+        "No College": 0     # Grey
+    }
+    df["status_value"] = df["status"].map(status_map)
 
-    # Map attendance status to colors
-    df["color"] = df["status"].map({"Present": "green", "Absent": "red"})
+    # Group by date (in case multiple entries exist)
+    daily_status = df.groupby("date")["status_value"].first()
 
-    # Plot calendar-style heatmap
-    fig = px.scatter(df, x="date", y=[1]*len(df), color="color",
-                     color_discrete_map={"green": "green", "red": "red"},
-                     title=f"📅 Attendance Calendar for {student}")
+    # Define custom color map: Gray (No College), Red (Absent), Green (Present)
+    from matplotlib.colors import ListedColormap
+    custom_cmap = ListedColormap(["#d3d3d3", "#ff0000", "#00cc44"])  # 0: grey, -1: red, 1: green
 
-    fig.update_xaxes(type="date", title="Date")
-    fig.update_yaxes(visible=False)
-    fig.update_layout(showlegend=False)
+    # Plot using calplot
+    fig, ax = calplot.calplot(
+        daily_status,
+        cmap=custom_cmap,
+        edgecolor='black',
+        linewidth=0.5,
+        yearlabel_kws={'fontsize': 16},
+        how='sum',
+        suptitle='Attendance Calendar',
+        colorbar=False
+    )
+    
 
-    st.plotly_chart(fig, use_container_width=True)
+    # Display on Streamlit
+    st.pyplot(fig)
 
 
 
