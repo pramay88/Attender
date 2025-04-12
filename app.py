@@ -40,10 +40,10 @@ default_users = [
 
     # Student Users with Roll Numbers
     {"username": "RBT23CB001", "password": "pass123", "role": "student", "name": "Pramay Wankhade"},
-    {"username": "RBT23CB002", "password": "pass123", "role": "student", "name": "Student 2"},
-    {"username": "RBT23CB003", "password": "pass123", "role": "student", "name": "Student 3"},
-    {"username": "RBT23CB004", "password": "pass123", "role": "student", "name": "Student 4"},
-    {"username": "RBT23CB005", "password": "pass123", "role": "student", "name": "Student 5"}
+    {"username": "RBT23CB002", "password": "pass123", "role": "student", "name": "Krushnakant Patil"},
+    {"username": "RBT23CB003", "password": "pass123", "role": "student", "name": "Kartik Kurtade"},
+    {"username": "RBT23CB004", "password": "pass123", "role": "student", "name": "Kaustubh Gawade"},
+    {"username": "RBT23CB005", "password": "pass123", "role": "student", "name": "Megh Yashwantkar"}
 ]
 
 # ✅ Inserting the default users into the database

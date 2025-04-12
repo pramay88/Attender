@@ -188,11 +188,20 @@ def student_dashboard():
             st.success(f"✅ Overall Attendance: {overall_percent:.2f}% (Not Defaulter)")
 
         st.divider()
-        if st.button("📅 Show Attendance Calendar"):
-            plot_attendance_calendar(student)
+
+         # 📚 Subject selection dropdown
+        subjects = list(faculty_subjects.values())
+        subjects = sorted(set(subjects))  # Remove duplicates just in case
+        subjects.insert(0, "All")
+        col1, col2 = st.columns([1,2])
+        # Subject selectbox in col2
+        filter_sub = col1.selectbox("🎯 Select Subject", subjects)
+
+        if col1.button("📅 Show Attendance Calendar"):
+            plot_attendance_calendar(student, subject_filter=filter_sub)
 
         st.divider()
-        
+                
         if st.button("📉 Show Analysis"):
             plot_attendance_graph(subject_attendance, overall_present, overall_total)
 
@@ -266,7 +275,8 @@ def fetch_attendance(student):
 
 # Function to plot attendance calendar
 def plot_attendance_calendar(student_name, subject_filter=None):
-
+    if subject_filter == "All":
+        subject_filter = None
     # Fetch attendance data
     attendance_data = fetch_attendance(student_name)
 
@@ -278,37 +288,38 @@ def plot_attendance_calendar(student_name, subject_filter=None):
     df = pd.DataFrame(attendance_data)
     df["date"] = pd.to_datetime(df["date"])
     
-    # Map status to numeric values for heatmap
+    # Optional subject filtering
+    if subject_filter:
+        df = df[df["subject"] == subject_filter]
+    
+    # Map status to numeric values
     status_map = {
-        "Present": 1,   # Green
-        "Absent": -1,   # Red
-        "No College": 0  # Grey
+        "Absent": 0,       # Red
+        "No College": 1,   # Grey
+        "Present": 2       # Green
     }
     df["status_value"] = df["status"].map(status_map)
 
-    # Group by date (in case multiple entries exist)
+    # Group by date
     daily_status = df.groupby("date")["status_value"].first()
 
-    # Gray (No College), Red (Absent), Green (Present)
-    
-    custom_cmap = ListedColormap(["#d3d3d3", "#ff0000", "#00cc44"])  # 0: grey, -1: red, 1: green
+    # Custom color map: Red, Grey, Green
+    custom_cmap = ListedColormap(["#ff0000", "#d3d3d3", "#00cc44"])
 
-    # Plot using calplot
+    # Plot calendar heatmap
     fig, ax = calplot.calplot(
         daily_status,
         cmap=custom_cmap,
         edgecolor='black',
         linewidth=0.5,
-        yearlabel_kws={'fontsize': 16},
-        how='sum',
+        how='first',
         suptitle='Attendance Calendar',
-        colorbar=False
+        colorbar=False,
+        yearlabel_kws={'fontsize': 16},
     )
     
-
-    # Display on Streamlit
+    # Display in Streamlit
     st.pyplot(fig)
-
 
 
 def main():
