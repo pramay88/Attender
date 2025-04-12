@@ -94,9 +94,17 @@ def faculty_dashboard():
             st.error("❌ Failed to delete attendance.")
     
     st.divider()
-    if st.button("📅 Show Attendance Calendar"):
-        plot_attendance_calendar(student)
-        
+    # 📚 Subject selection dropdown
+    subjects = list(faculty_subjects.values())
+    subjects = sorted(set(subjects))  # Remove duplicates just in case
+    subjects.insert(0, "All")
+    col1, col2 = st.columns([1,2])
+    # Subject selectbox in col2
+    filter_sub = col1.selectbox("🎯 Select Subject", subjects)
+
+    if col1.button("📅 Show Attendance Calendar"):
+        plot_attendance_calendar(student, subject_filter=filter_sub)
+    
 
     st.divider()
 
@@ -189,7 +197,7 @@ def student_dashboard():
 
         st.divider()
 
-         # 📚 Subject selection dropdown
+        # 📚 Subject selection dropdown
         subjects = list(faculty_subjects.values())
         subjects = sorted(set(subjects))  # Remove duplicates just in case
         subjects.insert(0, "All")
